@@ -1,0 +1,109 @@
+package znet
+
+import (
+	"fmt"
+	"github.com/tonly18/xws/core/logger"
+	"github.com/tonly18/xws/core/zconf"
+	"github.com/tonly18/xws/core/ziface"
+	"runtime"
+)
+
+// MsgHandle
+type MsgHandle struct {
+	Apis           map[uint32]ziface.IRouter //存放每个MsgID 所对应的处理方法的map属性
+	WorkerPoolSize uint32                    //业务工作Worker池的数量
+	TaskQueue      []chan ziface.IRequest    //Worker负责取任务的消息队列
+}
+
+// NewMsgHandle 创建MsgHandle
+func NewMsgHandle() ziface.IMsgHandle {
+	return &MsgHandle{
+		Apis:           make(map[uint32]ziface.IRouter),
+		WorkerPoolSize: zconf.Config.WorkerPoolSize,
+		//一个worker对应一个queue
+		TaskQueue: make([]chan ziface.IRequest, zconf.Config.WorkerPoolSize),
+	}
+}
+
+// SendMsgToTaskQueue 将消息交给TaskQueue,由worker进行处理
+func (mh *MsgHandle) SendMsgToTaskQueue(request ziface.IRequest) {
+	//根据ConnID来分配当前的连接应该由哪个worker负责处理
+	//轮询的平均分配法则
+
+	//得到需要处理此条连接的workerID
+	workerID := request.GetConnection().GetConnID() % uint64(mh.WorkerPoolSize)
+
+	//将请求消息发送给任务队列
+	mh.TaskQueue[workerID] <- request
+}
+
+// DoMsgHandler 马上以非阻塞方式处理消息
+func (mh *MsgHandle) DoMsgHandler(request ziface.IRequest) {
+	defer func() {
+		//执行完成后回收Request对象回对象池
+		PutRequest(request)
+
+		//recover
+		if err := recover(); err != nil {
+			logger.LogErrorf("[DoMsgHandler Handler] Panic, Error(1): %v", err)
+			for i := 1; i < 20; i++ {
+				if pc, file, line, ok := runtime.Caller(i); ok {
+					function := runtime.FuncForPC(pc).Name() //获取函数名
+					logger.LogErrorf(`[DoMsgHandler Handler] Goroutine:%v, file:%s, func:%s, line:%d`, pc, file, function, line)
+				}
+			}
+			logger.LogErrorf("[DoMsgHandler Handler] Panic, Error(2): %v", err)
+		}
+	}()
+
+	//handler
+	handler, ok := mh.Apis[request.GetMsgID()]
+	if !ok {
+		logger.LogErrorf(`[DoMsgHandler Handler] message handler API not found, MsgID:%v`, request.GetMsgID())
+		return
+	}
+
+	//Request请求绑定Router对应关系,并执行对应处理方法
+	request.BindRouter(handler)
+	if err := request.Call(); err != nil {
+		logger.LogErrorf(`[DoMsgHandler Handler] message id:%v, error:%v`, request.GetMsgID(), err)
+	}
+}
+
+// AddRouter 为消息添加具体的处理逻辑
+func (mh *MsgHandle) AddRouter(msgID uint32, router ziface.IRouter) {
+	//1 判断当前msg绑定的API处理方法是否已经存在
+	if _, ok := mh.Apis[msgID]; ok {
+		panic(fmt.Sprintf(`Repeated Api, MsgID: %v`, msgID))
+	}
+	//2 添加msg与api的绑定关系
+	mh.Apis[msgID] = router
+
+	logger.LogInfof("Add Api MsgID: %v", msgID)
+}
+
+// StartOneWorker 启动一个Worker工作流程
+func (mh *MsgHandle) StartOneWorker(workerID int, taskQueue chan ziface.IRequest) {
+	logger.LogInfof("Worker ID:%v is started", workerID)
+
+	//不断的等待队列中的消息
+	for {
+		select {
+		//有消息则取出队列的Request,并执行绑定的业务方法
+		case request := <-taskQueue:
+			mh.DoMsgHandler(request)
+		}
+	}
+}
+
+// StartWorkerPool 启动worker工作池
+func (mh *MsgHandle) StartWorkerPool() {
+	//遍历需要启动worker的数量，依此启动
+	for i := 0; i < int(mh.WorkerPoolSize); i++ {
+		//一个worker被启动
+		//给当前worker对应的任务队列开辟空间
+		mh.TaskQueue[i] = make(chan ziface.IRequest, zconf.Config.MaxWorkerTaskLen)
+		//启动当前Worker，阻塞的等待对应的任务队列是否有消息传递进来
+		go mh.StartOneWorker(i, mh.TaskQueue[i])
+	}
+}

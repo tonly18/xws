@@ -1,0 +1,22 @@
+[http]
+Host = "0.0.0.0"
+Port = 6000
+
+[wsServer]
+ENV = "dev"
+Host = "127.0.0.1"
+Port = 7000
+Path = "/ws"
+Name = "ws-server"
+ServerID = 1
+#MaxConn = 10000
+#WorkerPoolSize = 16
+#MaxWorkerTaskLen = 1024
+#MaxMsgChanLen = 1024
+#MaxPacketSize = 4096
+#MaxConnReadTime = 5000
+#MaxConnWriteTime = 5000
+#CertFile = ""
+#PrivateKeyFile = ""
+# 心跳超时时间（单位：秒）
+HeartbeatMax = 30
