@@ -6,12 +6,13 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
-	"github.com/tonly18/xws/core/logger"
-	"github.com/tonly18/xws/core/zconf"
-	"github.com/tonly18/xws/core/ziface"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/tonly18/xws/core/logger"
+	"github.com/tonly18/xws/core/zconf"
+	"github.com/tonly18/xws/core/ziface"
 
 	"github.com/gorilla/websocket"
 )
@@ -251,7 +252,7 @@ func (c *WsConnection) IsAlive() bool {
 	}
 
 	// 检查连接最后一次活动时间，如果超过心跳间隔，则认为连接已经死亡
-	return time.Now().Sub(c.lastActivityTime) < zconf.Config.HeartbeatMax
+	return time.Now().Sub(c.lastActivityTime) < time.Duration(zconf.Config.HeartbeatMax)*time.Second
 }
 
 // StartWriter 写消息Goroutine， 用户将数据发送给客户端

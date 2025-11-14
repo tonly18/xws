@@ -1,7 +1,5 @@
 package zconf
 
-import "time"
-
 type ZConfig struct {
 	ENV      string
 	Host     string //当前服务器主机IP
@@ -25,7 +23,7 @@ type ZConfig struct {
 	PrivateKeyFile string
 
 	//最长心跳检测间隔时长,超过改时间间隔,则认为超时
-	HeartbeatMax time.Duration
+	HeartbeatMax int
 }
 
 var Config *ZConfig
@@ -48,7 +46,7 @@ func Init(c *ZConfig) {
 		MaxConnReadTime:  1800,
 		MaxConnWriteTime: 1800,
 
-		HeartbeatMax: time.Second * 30,
+		HeartbeatMax: 30,
 	}
 
 	if c.ENV != "" {
