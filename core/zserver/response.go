@@ -4,5 +4,5 @@ package zserver
 type Response struct {
 	Code    string `json:"code"`
 	Data    any    `json:"data"`
-	Message string `json:"msg"`
+	Message string `json:"message"`
 }
