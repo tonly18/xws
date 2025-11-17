@@ -2,11 +2,12 @@ package tcpserver
 
 import (
 	"fmt"
+
 	"github.com/tonly18/xws/core/logger"
 	"github.com/tonly18/xws/core/zconf"
 	"github.com/tonly18/xws/core/znet"
 	"github.com/tonly18/xws/core/zutils"
-	"github.com/tonly18/xws/example/global"
+	"github.com/tonly18/xws/example/pkg/global"
 	"github.com/tonly18/xws/example/sconf"
 	"github.com/tonly18/xws/example/wserver/hook"
 	"github.com/tonly18/xws/example/wserver/router"

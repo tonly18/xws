@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/tonly18/xws/example/global"
+	"github.com/tonly18/xws/example/pkg/global"
 	"github.com/tonly18/xws/example/sconf"
 )
 

@@ -3,11 +3,13 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/tonly18/xws/core/logger"
 	"github.com/tonly18/xws/core/xerror"
 	"github.com/tonly18/xws/core/ziface"
 	"github.com/tonly18/xws/core/zserver"
-	"github.com/tonly18/xws/example/global"
+	"github.com/tonly18/xws/example/pkg/global"
+
 	"net/http"
 	"runtime"
 

@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/tonly18/xws/core/zutils"
-	"github.com/tonly18/xws/example/global"
 	httpserver "github.com/tonly18/xws/example/hserver"
+	"github.com/tonly18/xws/example/pkg/global"
 	"github.com/tonly18/xws/example/service"
 	wserver "github.com/tonly18/xws/example/wserver"
 )

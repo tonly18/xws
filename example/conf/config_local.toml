@@ -20,3 +20,21 @@ ServerID = 1
 #PrivateKeyFile = ""
 # 心跳超时时间（单位：秒）
 HeartbeatMax = 30
+
+[[mysql]]
+role = "default"
+host = "54.69.237.139"
+port = 8082
+username = "root"
+password = "123456"
+dbname = "sports-dev-payment"
+
+[redis]
+host = ["54.69.237.139:8084", "54.69.237.139:8085", "54.69.237.139:8086"]
+username = ""
+password = ""
+serverName = ""
+poolSize = 50
+maxIdleConns = 50
+minIdleConns = 20
+prefix = "payment"
