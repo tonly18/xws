@@ -1,0 +1,41 @@
+[http]
+Host = "0.0.0.0"
+Port = 6000
+
+[wsServer]
+ENV = "dev"
+Host = "0.0.0.0"
+Port = 7000
+Path = "/ws"
+Name = "ws-server"
+ServerID = 1
+MaxConn = 50000
+WorkerPoolSize = 2
+#MaxWorkerTaskLen = 1024
+#MaxMsgChanLen = 1024
+#MaxPacketSize = 4096
+#MaxConnReadTime = 5000
+#MaxConnWriteTime = 5000
+#CertFile = ""
+#PrivateKeyFile = ""
+# 心跳超时时间（单位：秒）
+HeartbeatMax = 30
+
+[[mysql]]
+role = "default"
+host = "54.69.237.139"
+port = 8082
+username = "root"
+password = "123456"
+dbname = "sports-dev-payment"
+
+[redis]
+host = ["54.69.237.139:8084", "54.69.237.139:8085", "54.69.237.139:8086"]
+username = ""
+password = ""
+serverName = ""
+poolSize = 50
+maxIdleConns = 50
+minIdleConns = 20
+prefix = "payment"
+Tls = false
